@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chutiya</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Background animation container -->
+    <div class="background-container" id="backgroundContainer"></div>
+
+    <!-- Auth/Login Page -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-card">
+            <h2>🔒</h2>
+            <p class="auth-question">Whom do you like the most AFTER TANU?</p>
+            <input type="text" id="passwordInput" placeholder="Type your answer..." autocomplete="off">
+            <button id="loginBtn">
+                Enter
+                <div class="heart-1">💗</div>
+                <div class="heart-2">💗</div>
+                <div class="heart-3">💗</div>
+                <div class="heart-4">💗</div>
+                <div class="heart-5">💗</div>
+                <div class="heart-6">💗</div>
+            </button>
+            <p class="auth-error" id="authError"></p>
+        </div>
+    </div>
+
+    <!-- Main Content (hidden until login) -->
+    <div class="main-content" id="mainContent" style="display: none;">
+        
+        <!-- Countdown Timer -->
+        <div class="content-card timer-card">
+            <h1>Days Until I eat sabzi again</h1>
+            <div class="countdown" id="countdown">
+                <div class="time-unit">
+                    <span class="time-value" id="days">00</span>
+                    <span class="time-label">Days</span>
+                </div>
+                <div class="time-unit">
+                    <span class="time-value" id="hours">00</span>
+                    <span class="time-label">Hours</span>
+                </div>
+                <div class="time-unit">
+                    <span class="time-value" id="minutes">00</span>
+                    <span class="time-label">Minutes</span>
+                </div>
+                <div class="time-unit">
+                    <span class="time-value" id="seconds">00</span>
+                    <span class="time-label">Seconds</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photo Slider -->
+        <div class="content-card slider-card">
+            <h2 class="slider-title">Some pictures that I look at when I miss you 💕<br><span class="subtitle">Please upload more :)</span></h2>
+            <div class="slider-container">
+                <button class="slider-btn prev-btn" id="prevBtn">‹</button>
+                <div class="slider-image-container">
+                    <img id="sliderImage" src="" alt="Upload your first photo! 📸">
+                    <div class="empty-state" id="emptyState">
+                        <p>📸</p>
+                        <p>No photos yet</p>
+                        <p>Upload one below!</p>
+                    </div>
+                    <button class="delete-photo-btn" id="deleteBtn" title="Delete this photo">✕</button>
+                </div>
+                <button class="slider-btn next-btn" id="nextBtn">›</button>
+            </div>
+            <div class="slider-controls">
+                <span id="imageCounter">0 / 0</span>
+                <button class="upload-btn" id="uploadBtn">
+                    Upload Photo
+                    <div class="heart-1">💗</div>
+                    <div class="heart-2">💗</div>
+                    <div class="heart-3">💗</div>
+                    <div class="heart-4">💗</div>
+                    <div class="heart-5">💗</div>
+                    <div class="heart-6">💗</div>
+                </button>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            </div>
+        </div>
+
+        <!-- Quotes Section -->
+        <div class="content-card quotes-card">
+            <h2>ALWAYS REMEMBER THAT</h2>
+            <p class="quote" id="currentQuote"></p>
+        </div>
+
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+</html>
