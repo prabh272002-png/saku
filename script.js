@@ -485,12 +485,15 @@ loadPhotosFromSupabase();
 
 // ==================== QUOTES ROTATION ====================
 const quotes = [
-    "You are really beautiful",
-    "Can't wait to see you laugh when I come on my tits again",
+    "I think you are really beautiful",
+    "I came on my own tits",
     "I am probably thinking about you rn",
     "I adore you a lot",
-    "To tell me that you like me",
-    "You are my golu"
+    "You need tell me that you like me every now and then",
+    "You are my golu",
+    "I miss you giving me rides",
+    "I am so obsessed with you",
+    "Hakla never dies"
 ];
 
 let currentQuoteIndex = 0;
