@@ -1,37 +1,21 @@
 // ==================== CRITICAL: CHECK SUPABASE LOADED ====================
-// Wait for page to fully load before checking
 window.addEventListener('DOMContentLoaded', () => {
     if (typeof window.supabase === 'undefined') {
         alert('Failed to load cloud storage. Please refresh the page or check your internet connection.');
         console.error('CRITICAL: Supabase SDK failed to load from CDN');
     }
+    if (typeof CONFIG === 'undefined') {
+        alert('Configuration file not found. Please make sure config.js exists.');
+        console.error('CRITICAL: config.js not loaded');
+    }
 });
 
 // ==================== SUPABASE CONFIG ====================
-const SUPABASE_URL = 'https://ybkvwyjqxkrgyjdrggul.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_rB1fH5rwpBRahXQK24A2-w_NjiV0Wfx';
-
-const supabase = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = window.supabase?.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 const BUCKET_NAME = 'photos';
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
 
 // ==================== AUTH SYSTEM ====================
-const authQuestions = [
-    { question: "Who is the prettiest boy ever?", answer: "prabh" },
-    { question: "Who came on his tits?", answer: "prabh" },
-    { question: "Who is your baby?", answer: "prabh" }
-];
-
-// Get a random question
-function getRandomQuestion() {
-    const randomIndex = Math.floor(Math.random() * authQuestions.length);
-    return authQuestions[randomIndex];
-}
-
-// Set up auth page
-const currentQuestion = getRandomQuestion();
-document.querySelector('.auth-question').textContent = currentQuestion.question;
-
 // Login functionality
 document.getElementById('loginBtn').addEventListener('click', handleLogin);
 document.getElementById('passwordInput').addEventListener('keypress', function(e) {
@@ -41,10 +25,10 @@ document.getElementById('passwordInput').addEventListener('keypress', function(e
 });
 
 function handleLogin() {
-    const input = document.getElementById('passwordInput').value.trim().toLowerCase();
+    const input = document.getElementById('passwordInput').value.trim();
     const errorElement = document.getElementById('authError');
     
-    if (input === currentQuestion.answer.toLowerCase()) {
+    if (input === CONFIG.PASSWORD) {
         // Correct password
         document.getElementById('authContainer').style.opacity = '0';
         setTimeout(() => {
@@ -56,7 +40,7 @@ function handleLogin() {
         }, 500);
     } else {
         // Wrong password
-        errorElement.textContent = 'Wrong answer! Try again 😏';
+        errorElement.textContent = 'Wrong password! Try again 😏';
         document.getElementById('passwordInput').value = '';
         document.getElementById('passwordInput').focus();
         
@@ -72,9 +56,9 @@ let spawnInterval;
 const THEMES = ['panipuri', 'memes', 'hearts'];
 let currentThemeIndex = 0;
 const THEME_DURATIONS = {
-    'panipuri': 8000,
+    'panipuri': 9000,
     'memes': 20000,
-    'hearts': 8000
+    'hearts': 9000
 };
 
 const memeImages = [
@@ -134,7 +118,6 @@ function createElement(type) {
             const chaddhiImg = document.createElement('img');
             chaddhiImg.src = randomChaddhi;
             chaddhiImg.alt = 'Chaddhi';
-            // Handle image load errors
             chaddhiImg.onerror = function() {
                 console.warn(`Failed to load image: ${this.src}`);
                 this.style.display = 'none';
@@ -159,7 +142,6 @@ function createElement(type) {
             const veggieImg = document.createElement('img');
             veggieImg.src = randomVeggie;
             veggieImg.alt = 'Veggie';
-            // Handle image load errors
             veggieImg.onerror = function() {
                 console.warn(`Failed to load image: ${this.src}`);
                 this.style.display = 'none';
@@ -173,7 +155,6 @@ function createElement(type) {
             const randomMeme = memeImages[Math.floor(Math.random() * memeImages.length)];
             memeImg.src = randomMeme;
             memeImg.alt = 'Meme';
-            // Handle image load errors
             memeImg.onerror = function() {
                 console.warn(`Failed to load image: ${this.src}`);
                 this.style.display = 'none';
@@ -282,9 +263,7 @@ updateCountdown();
 let photos = [];
 let currentPhotoIndex = 0;
 
-// Load photos from Supabase on page load
 async function loadPhotosFromSupabase() {
-    // Safety check
     if (!supabase) {
         console.error('Supabase client not initialized');
         return;
@@ -301,7 +280,6 @@ async function loadPhotosFromSupabase() {
         
         if (error) {
             console.error('Error loading photos:', error);
-            // Don't show alert for empty bucket - that's expected initially
             if (error.message && !error.message.includes('not found')) {
                 console.warn('Photo loading issue:', error.message);
             }
@@ -342,7 +320,6 @@ function updateSlider() {
         deleteBtn.style.display = 'flex';
         emptyState.classList.remove('visible');
         
-        // Handle image load errors
         sliderImage.onerror = function() {
             console.error(`Failed to load photo: ${this.src}`);
             this.alt = 'Failed to load image';
@@ -382,7 +359,6 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
     uploadBtn.classList.add('uploading');
     
     if (file) {
-        // CRITICAL: File size validation
         if (file.size > MAX_FILE_SIZE) {
             alert('File too large! Please choose an image under 50MB.');
             uploadBtn.classList.remove('uploading');
@@ -390,7 +366,6 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
             return;
         }
         
-        // Validate file type
         if (!file.type.startsWith('image/')) {
             alert('Please upload an image file (JPEG, PNG, GIF, etc.)');
             uploadBtn.classList.remove('uploading');
@@ -398,7 +373,6 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
             return;
         }
         
-        // Safety check
         if (!supabase) {
             alert('Cloud storage unavailable. Please refresh the page.');
             uploadBtn.classList.remove('uploading');
@@ -409,12 +383,10 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
         try {
             imageCounter.textContent = 'Uploading...';
             
-            // Create unique filename
             const timestamp = Date.now();
             const fileExt = file.name.split('.').pop();
             const fileName = `photo_${timestamp}.${fileExt}`;
             
-            // Upload to Supabase Storage
             const { data, error } = await supabase.storage
                 .from(BUCKET_NAME)
                 .upload(fileName, file, {
@@ -426,12 +398,10 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
                 throw error;
             }
             
-            // Get public URL
             const { data: urlData } = supabase.storage
                 .from(BUCKET_NAME)
                 .getPublicUrl(fileName);
             
-            // Add to local array
             photos.unshift({
                 name: fileName,
                 url: urlData.publicUrl,
@@ -448,7 +418,6 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
         } catch (error) {
             console.error('Error uploading photo:', error);
             
-            // Better error messages
             let errorMessage = 'Failed to upload photo. ';
             if (error.message) {
                 if (error.message.includes('exceeded')) {
@@ -475,11 +444,9 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
     e.target.value = '';
 });
 
-// Delete photo functionality
 document.getElementById('deleteBtn').addEventListener('click', async () => {
     if (photos.length > 0) {
         if (confirm('Delete this photo?')) {
-            // Safety check
             if (!supabase) {
                 alert('Cloud storage unavailable. Please refresh the page.');
                 return;
@@ -488,7 +455,6 @@ document.getElementById('deleteBtn').addEventListener('click', async () => {
             try {
                 const photoToDelete = photos[currentPhotoIndex];
                 
-                // Delete from Supabase Storage
                 const { error } = await supabase.storage
                     .from(BUCKET_NAME)
                     .remove([photoToDelete.name]);
@@ -497,10 +463,8 @@ document.getElementById('deleteBtn').addEventListener('click', async () => {
                     throw error;
                 }
                 
-                // Remove from local array
                 photos.splice(currentPhotoIndex, 1);
                 
-                // Adjust current index
                 if (currentPhotoIndex >= photos.length && photos.length > 0) {
                     currentPhotoIndex = photos.length - 1;
                 } else if (photos.length === 0) {
@@ -517,7 +481,6 @@ document.getElementById('deleteBtn').addEventListener('click', async () => {
     }
 });
 
-// Load photos when page loads
 loadPhotosFromSupabase();
 
 // ==================== QUOTES ROTATION ====================
