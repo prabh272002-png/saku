@@ -1,27 +1,12 @@
-// ==================== CRITICAL: CHECK SUPABASE LOADED ====================
-window.addEventListener('DOMContentLoaded', () => {
-    if (typeof window.supabase === 'undefined') {
-        alert('Failed to load cloud storage. Please refresh the page or check your internet connection.');
-        console.error('CRITICAL: Supabase SDK failed to load from CDN');
-    }
-    if (typeof CONFIG === 'undefined') {
-        alert('Configuration file not found. Please make sure config.js exists.');
-        console.error('CRITICAL: config.js not loaded');
-    }
-});
-
 // ==================== SUPABASE CONFIG ====================
-const supabase = window.supabase?.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 const BUCKET_NAME = 'photos';
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
 // ==================== AUTH SYSTEM ====================
-// Login functionality
 document.getElementById('loginBtn').addEventListener('click', handleLogin);
 document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        handleLogin();
-    }
+    if (e.key === 'Enter') handleLogin();
 });
 
 function handleLogin() {
@@ -29,7 +14,6 @@ function handleLogin() {
     const errorElement = document.getElementById('authError');
     
     if (input === CONFIG.PASSWORD) {
-        // Correct password
         document.getElementById('authContainer').style.opacity = '0';
         setTimeout(() => {
             document.getElementById('authContainer').style.display = 'none';
@@ -39,12 +23,9 @@ function handleLogin() {
             }, 50);
         }, 500);
     } else {
-        // Wrong password
         errorElement.textContent = 'Wrong password! Try again 😏';
         document.getElementById('passwordInput').value = '';
         document.getElementById('passwordInput').focus();
-        
-        // Clear error after 3 seconds
         setTimeout(() => {
             errorElement.textContent = '';
         }, 3000);
@@ -77,9 +58,7 @@ const backgroundContainer = document.getElementById('backgroundContainer');
 
 function clearBackground() {
     backgroundContainer.innerHTML = '';
-    if (spawnInterval) {
-        clearInterval(spawnInterval);
-    }
+    if (spawnInterval) clearInterval(spawnInterval);
 }
 
 function createElement(type) {
@@ -92,17 +71,12 @@ function createElement(type) {
     const centerStart = screenWidth * 0.25;
     const centerEnd = screenWidth * 0.75;
     
-    let randomX;
-    if (Math.random() > 0.5) {
-        randomX = Math.random() * centerStart;
-    } else {
-        randomX = centerEnd + Math.random() * (screenWidth - centerEnd);
-    }
+    let randomX = Math.random() > 0.5 
+        ? Math.random() * centerStart 
+        : centerEnd + Math.random() * (screenWidth - centerEnd);
     
     element.style.left = randomX + 'px';
-    
-    const duration = 7 + Math.random() * 3;
-    element.style.animation = `floatUpSway ${duration}s ease-in-out forwards`;
+    element.style.animation = `floatUpSway ${7 + Math.random() * 3}s ease-in-out forwards`;
     
     switch(type) {
         case 'heart':
@@ -112,16 +86,10 @@ function createElement(type) {
                 'assets/backgrounds/peach.jpg',
                 'assets/backgrounds/wet.jpg'
             ];
-            
-            const randomChaddhi = chaddhiImages[Math.floor(Math.random() * chaddhiImages.length)];
-            
             const chaddhiImg = document.createElement('img');
-            chaddhiImg.src = randomChaddhi;
+            chaddhiImg.src = chaddhiImages[Math.floor(Math.random() * chaddhiImages.length)];
             chaddhiImg.alt = 'Chaddhi';
-            chaddhiImg.onerror = function() {
-                console.warn(`Failed to load image: ${this.src}`);
-                this.style.display = 'none';
-            };
+            chaddhiImg.onerror = function() { this.style.display = 'none'; };
             element.appendChild(chaddhiImg);
             element.style.width = (90 + Math.random() * 50) + 'px';
             break;
@@ -136,29 +104,19 @@ function createElement(type) {
                 'assets/backgrounds/carrot.jpg',
                 'assets/backgrounds/cucumber.jpg'
             ];
-            
-            const randomVeggie = veggies[Math.floor(Math.random() * veggies.length)];
-            
             const veggieImg = document.createElement('img');
-            veggieImg.src = randomVeggie;
+            veggieImg.src = veggies[Math.floor(Math.random() * veggies.length)];
             veggieImg.alt = 'Veggie';
-            veggieImg.onerror = function() {
-                console.warn(`Failed to load image: ${this.src}`);
-                this.style.display = 'none';
-            };
+            veggieImg.onerror = function() { this.style.display = 'none'; };
             element.appendChild(veggieImg);
             element.style.width = (90 + Math.random() * 50) + 'px';
             break;
             
         case 'meme':
             const memeImg = document.createElement('img');
-            const randomMeme = memeImages[Math.floor(Math.random() * memeImages.length)];
-            memeImg.src = randomMeme;
+            memeImg.src = memeImages[Math.floor(Math.random() * memeImages.length)];
             memeImg.alt = 'Meme';
-            memeImg.onerror = function() {
-                console.warn(`Failed to load image: ${this.src}`);
-                this.style.display = 'none';
-            };
+            memeImg.onerror = function() { this.style.display = 'none'; };
             element.appendChild(memeImg);
             element.style.width = (100 + Math.random() * 40) + 'px';
             break;
@@ -170,31 +128,23 @@ function createElement(type) {
 function spawnElement(type) {
     const element = createElement(type);
     backgroundContainer.appendChild(element);
-    
     setTimeout(() => {
-        if (element.parentNode) {
-            element.remove();
-        }
+        if (element.parentNode) element.remove();
     }, 11000);
 }
 
 function startSpawning(type) {
     clearBackground();
     spawnElement(type);
-    
-    spawnInterval = setInterval(() => {
-        spawnElement(type);
-    }, 400);
+    spawnInterval = setInterval(() => spawnElement(type), 400);
 }
 
 function cycleTheme() {
     const nextTheme = THEMES[currentThemeIndex];
-    
     backgroundContainer.style.opacity = '0';
     
     setTimeout(() => {
         const titleElement = document.querySelector('.timer-card h1');
-        
         if (nextTheme === 'panipuri') {
             startSpawning('panipuri');
             titleElement.textContent = 'Days Until I Eat Sabzi Again 🥦';
@@ -205,29 +155,23 @@ function cycleTheme() {
             startSpawning('heart');
             titleElement.innerHTML = 'Days Until Kacchi Geeli Again <img src="assets/backgrounds/chaddhi.jpg" class="title-emoji" alt="chaddhi">';
         }
-        
         backgroundContainer.style.opacity = '1';
     }, 1000);
 }
 
 backgroundContainer.style.transition = 'opacity 1s ease-in-out';
 backgroundContainer.style.opacity = '1';
-
 document.querySelector('.timer-card h1').textContent = 'Days Until I Eat Sabzi Again 🥦';
-
 startSpawning('panipuri');
 
 function scheduleNextTheme() {
     const currentTheme = THEMES[currentThemeIndex];
-    const duration = THEME_DURATIONS[currentTheme];
-    
     setTimeout(() => {
         currentThemeIndex = (currentThemeIndex + 1) % THEMES.length;
         cycleTheme();
         scheduleNextTheme();
-    }, duration);
+    }, THEME_DURATIONS[currentTheme]);
 }
-
 scheduleNextTheme();
 
 // ==================== COUNTDOWN TIMER ====================
@@ -264,35 +208,26 @@ let photos = [];
 let currentPhotoIndex = 0;
 
 async function loadPhotosFromSupabase() {
-    if (!supabase) {
+    if (!supabaseClient) {
         console.error('Supabase client not initialized');
         return;
     }
 
     try {
-        const { data, error } = await supabase
-            .storage
-            .from(BUCKET_NAME)
-            .list('', {
-                limit: 1000,
-                sortBy: { column: 'created_at', order: 'desc' }
-            });
+        const { data, error } = await supabaseClient.storage.from(BUCKET_NAME).list('', {
+            limit: 1000,
+            sortBy: { column: 'created_at', order: 'desc' }
+        });
         
         if (error) {
             console.error('Error loading photos:', error);
-            if (error.message && !error.message.includes('not found')) {
-                console.warn('Photo loading issue:', error.message);
-            }
             return;
         }
         
         photos = data
             .filter(file => file.name !== '.emptyFolderPlaceholder')
             .map(file => {
-                const { data: urlData } = supabase.storage
-                    .from(BUCKET_NAME)
-                    .getPublicUrl(file.name);
-                
+                const { data: urlData } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(file.name);
                 return {
                     name: file.name,
                     url: urlData.publicUrl,
@@ -319,7 +254,6 @@ function updateSlider() {
         imageCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
         deleteBtn.style.display = 'flex';
         emptyState.classList.remove('visible');
-        
         sliderImage.onerror = function() {
             console.error(`Failed to load photo: ${this.src}`);
             this.alt = 'Failed to load image';
@@ -372,8 +306,8 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
             e.target.value = '';
             return;
         }
-        
-        if (!supabase) {
+
+        if (!supabaseClient) {
             alert('Cloud storage unavailable. Please refresh the page.');
             uploadBtn.classList.remove('uploading');
             e.target.value = '';
@@ -382,25 +316,19 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
         
         try {
             imageCounter.textContent = 'Uploading...';
-            
+
             const timestamp = Date.now();
             const fileExt = file.name.split('.').pop();
             const fileName = `photo_${timestamp}.${fileExt}`;
-            
-            const { data, error } = await supabase.storage
-                .from(BUCKET_NAME)
-                .upload(fileName, file, {
-                    cacheControl: '3600',
-                    upsert: false
-                });
-            
-            if (error) {
-                throw error;
-            }
-            
-            const { data: urlData } = supabase.storage
-                .from(BUCKET_NAME)
-                .getPublicUrl(fileName);
+
+            const { data, error } = await supabaseClient.storage.from(BUCKET_NAME).upload(fileName, file, {
+                cacheControl: '3600',
+                upsert: false
+            });
+
+            if (error) throw error;
+
+            const { data: urlData } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(fileName);
             
             photos.unshift({
                 name: fileName,
@@ -417,21 +345,7 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
             
         } catch (error) {
             console.error('Error uploading photo:', error);
-            
-            let errorMessage = 'Failed to upload photo. ';
-            if (error.message) {
-                if (error.message.includes('exceeded')) {
-                    errorMessage += 'Storage limit reached.';
-                } else if (error.message.includes('network')) {
-                    errorMessage += 'Check your internet connection.';
-                } else {
-                    errorMessage += 'Please try again.';
-                }
-            } else {
-                errorMessage += 'Please try again.';
-            }
-            
-            alert(errorMessage);
+            alert('Failed to upload photo. Please try again.');
             uploadBtn.classList.remove('uploading');
             updateSlider();
         }
@@ -447,21 +361,16 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
 document.getElementById('deleteBtn').addEventListener('click', async () => {
     if (photos.length > 0) {
         if (confirm('Delete this photo?')) {
-            if (!supabase) {
+            if (!supabaseClient) {
                 alert('Cloud storage unavailable. Please refresh the page.');
                 return;
             }
-            
+
             try {
                 const photoToDelete = photos[currentPhotoIndex];
+                const { error } = await supabaseClient.storage.from(BUCKET_NAME).remove([photoToDelete.name]);
                 
-                const { error } = await supabase.storage
-                    .from(BUCKET_NAME)
-                    .remove([photoToDelete.name]);
-                
-                if (error) {
-                    throw error;
-                }
+                if (error) throw error;
                 
                 photos.splice(currentPhotoIndex, 1);
                 
